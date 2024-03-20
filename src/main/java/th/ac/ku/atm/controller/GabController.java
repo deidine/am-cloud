@@ -53,7 +53,7 @@ public class GabController {
 
     @PostMapping("verify")
     String verify(String noCarte, Model model) {
-        Carte crt = repository.getCartByPin(Integer.parseInt(noCarte));
+        Carte crt = repository.getCartByPin(noCarte);
         if (crt != null) {
             // Si le code PIN est correct, réinitialise le nombre d'essais restants
             remainingAttempts = 3;
@@ -108,7 +108,7 @@ public class GabController {
 
 	
             // Ajouter les attributs nécessaires pour l'impression du ticket
-            model.addAttribute("carte", repository.getCartByPin(Integer.parseInt(noCarte)));
+            model.addAttribute("carte", repository.getCartByPin( noCarte));
             model.addAttribute("user", cmpt.getUser());
             model.addAttribute("compte", cmpt);
             model.addAttribute("date", date);

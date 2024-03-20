@@ -12,7 +12,7 @@ public interface CarteRepository extends JpaRepository<Carte, Integer> {
 
     @Query(value = " Select * FROM cartes where  pin=?1", nativeQuery = true)
 
-    Carte getCartByPin(int pin);
+    Carte getCartByPin(String pin);
 
 
 
