@@ -72,11 +72,10 @@
 
 
 <table class="clsstable" border="2px" width="800px" height="500px">
-    <form class="login-container" th:action="@{/atm/withdraw}" method="POST">
 	<tbody>
 	<tr>
 		<td colspan="4">
-			<div id="withdrawOptions" style="display: none;" >
+			<div id="withdrawOptions" style="display: none;">
 				<p>Choisissez le montant et le nombre de billets à retirer :</p>
 				<div>
 					<img src="/web/images/200.png" alt="Billet 200" onclick="selectBill(200)" class="bill-image">
@@ -85,9 +84,8 @@
 					<img src="/web/images/100.jpeg" alt="Billet 100" onclick="selectBill(100)" class="bill-image">
 					<img src="/web/images/50.jpg" alt="Billet 50" onclick="selectBill(50)" class="bill-image">
 				</div>
-    <input type="hidden" name="noCarte" th:value="${carte.getPin()}">
-    <input type="hidden" name="compteId" th:value="${compte.getId()}"> 
-	
+				<input type="number" id="billCount" placeholder="Nombre de billets">
+				<button onclick="withdrawMoney()">Valider</button>
 			</div>
 			<div id="selectedBillsDisplay" style="display: none;">
 				<p>Billets sélectionnés :</p>
@@ -117,14 +115,15 @@
 	<tr>
 		<td></td>
 		<td colspan="2" rowspan="2">
-			<input type="number" class="clssinput" id="withdrawAmount"  name="montant" placeholder="00,000:00">
+			<input type="number" class="clssinput" id="withdrawAmount" placeholder="00,000:00">
 		</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>
-			
-			<button class="clssbutton" style="background-color: red;" onclick="withdrawMoney()" name="action" type="text">Valider</button>
+			<input type="hidden" name="noCarte" th:value="${carte.getPin()}">
+			<input type="hidden" name="compteId" th:value="${compte.getId()}">
+			<button class="clssbutton" name="action" type="text">Transfert</button>
 		</td>
 		<td>
 			<button class="clssbutton" id="end">
@@ -134,7 +133,6 @@
 	</tr>
 	</tbody>
 
-    </form>
 </table>
 
 <!-- Modal -->
@@ -174,48 +172,57 @@
 
 
     function turnOn() {
-event.preventDefault();
-
         userBalance.innerText = "Votre solde est de : " + solde.value;
         userDetails.innerText = "";
     }
 
     function calculateBillCount(billValue, withdrawAmount) {
-event.preventDefault();
-
         return Math.floor(withdrawAmount / billValue);
     }
 
     function updateSelectedBillsDisplay() {
-event.preventDefault();
-
         var selectedBillsText = "";
         var totalAmount = 0;
         for (var bill in selectedBills) {
             selectedBillsText += selectedBills[bill] + " billet(s) de " + bill + " ";
             totalAmount += selectedBills[bill] * parseInt(bill);
         }
-        document.getElementById('withdrawAmount').value =totalAmount
         userDetails.innerText = selectedBillsText + " Total : " + totalAmount;
     }
 
 function withdrawMoney() {
-    var withdrawAmount = document.getElementById('withdrawAmount').value ; 
+    var withdrawAmount = parseFloat(document.getElementById('withdrawAmount').value);
+    if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
+        alert("Veuillez saisir un montant valide à retirer.");
+        return;
+    }
 
-   
-    
- 
+    var billCount = parseInt(document.getElementById('billCount').value);
+    if (isNaN(billCount) || billCount <= 0) {
+        alert("Veuillez saisir un nombre de billets valide.");
+        return;
+    }
+
+    var totalBillsSelected = 0;
+    for (var bill in selectedBills) {
+        totalBillsSelected += selectedBills[bill];
+    }
+
+    if (totalBillsSelected !== billCount) {
+        alert("Le nombre de billets sélectionnés ne correspond pas au nombre de billets valide.");
+        return;
+    }
+
     var totalAmount = 0;
     for (var bill in selectedBills) {
         totalAmount += selectedBills[bill] * parseInt(bill);
     }
-// event.preventDefault();
-//
-//    if (totalAmount !== withdrawAmount) {
- //       alert("Le montant à retirer ne correspond pas au total des billets sélectionnés.");
-       
- //       return;
-//    }
+
+    if (totalAmount !== withdrawAmount) {
+        alert("Le montant à retirer ne correspond pas au total des billets sélectionnés.");
+        return;
+    }
+
     // Ajoutez ici la logique pour imprimer le ticket
     var ticketContent = "Montant retiré : " + withdrawAmount.toFixed(2) + "\n";
 
@@ -227,6 +234,7 @@ function withdrawMoney() {
 
     // Affichez le message de retrait avec le montant retiré et le solde actuel
     userDetails.innerText = "Montant retiré : " + withdrawAmount.toFixed(2) + "\nSolde actuel : " + nouveauSolde.toFixed(2);
+
     // Ajoutez ici la logique pour enregistrer le retrait et mettre à jour le solde dans votre système
 
     // Affichez un message de confirmation à l'utilisateur
@@ -235,43 +243,36 @@ function withdrawMoney() {
     // Réinitialisez les champs et masquez les options de retrait
     selectedBill = 0;
     selectedBills = {};
-    document.getElementById('withdrawAmount').value = ""; 
-   document.getElementById('withdrawOptions').style.display = 'none';
+    document.getElementById('withdrawAmount').value = "";
+    document.getElementById('billCount').value = "";
+    document.getElementById('withdrawOptions').style.display = 'none';
 }
 
 function cancelWithdrawal() {
-event.preventDefault();
-
     selectedBill = 0;
     selectedBills = {};
-    document.getElementById('withdrawAmount').value = ""; 
+    document.getElementById('withdrawAmount').value = "";
+    document.getElementById('billCount').value = "";
     document.getElementById('withdrawOptions').style.display = 'none';
     userDetails.innerText = ""; //
 }
 
 
     function verify() {
-event.preventDefault();
-
         // Vous pouvez ajouter ici la logique de vérification, si nécessaire.
         return true; // Permet de soumettre le formulaire.
     }
 
     function showWithdrawOptions() {
-event.preventDefault();
-
         document.getElementById('withdrawOptions').style.display = 'block';
     }
 
     function selectBill(billValue) {
-event.preventDefault();
-
         if (selectedBills[billValue]) {
             selectedBills[billValue]++;
         } else {
             selectedBills[billValue] = 1;
         }
-        
         updateSelectedBillsDisplay();
     }
 
@@ -280,3 +281,4 @@ event.preventDefault();
 
 </body>
 </html>
+    
